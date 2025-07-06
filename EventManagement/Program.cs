@@ -1,7 +1,17 @@
+using EventManagement.Hubs;
+using EventManagement.Models;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+
+builder.Services.AddSignalR(o => o.EnableDetailedErrors = true);
+
+// Register the DbContext with dependency injection
+builder.Services.AddDbContext<EventManagementContext>
+    (options => options.UseSqlServer(builder.Configuration.GetConnectionString("MyCnn")));
 
 var app = builder.Build();
 
@@ -19,6 +29,13 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
+
+app.MapHub<EventHub>("/EventHub");
+app.MapGet("/", context =>
+{
+    context.Response.Redirect("/Events");
+    return Task.CompletedTask;
+});
 
 app.MapRazorPages();
 

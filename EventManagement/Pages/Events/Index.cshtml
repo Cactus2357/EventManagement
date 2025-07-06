@@ -1,0 +1,81 @@
+﻿@page
+@model EventManagement.Pages.Events.IndexModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-page="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Event[0].Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Event[0].Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Event[0].StartTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Event[0].EndTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Event[0].Status)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Event[0].Organizer)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Event[0].Venue)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Event)
+        {
+            <tr>
+                <td>
+                    <a asp-page="Details" asp-route-id="@item.EventId">
+                        @Html.DisplayFor(modelItem => item.Title)
+                    </a>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.StartTime)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EndTime)
+                </td>
+                <td>
+                    <span class="badge text-@(item.Status.Equals("completed") ? "success" : "primary")">
+                        @item.Status
+                    </span>
+                </td>
+                <td>
+                    <a asp-page="/Users/Details" asp-route-id="@item.Organizer.UserId">
+                        @Html.DisplayFor(modelItem => item.Organizer.Name)
+                    </a>
+                </td>
+                <td>
+                    <a asp-page="/Venues/Details" asp-route-id="@item.Venue.VenueId">
+                        @Html.DisplayFor(modelItem => item.Venue.Name)
+                    </a>
+                </td>
+                <td>
+                    <a asp-page="./Edit" asp-route-id="@item.EventId">Edit</a> |
+                    <a asp-page="./Details" asp-route-id="@item.EventId">Details</a> |
+                    <a asp-page="./Delete" asp-route-id="@item.EventId">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
