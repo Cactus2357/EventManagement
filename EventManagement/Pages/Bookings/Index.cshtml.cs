@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using EventManagement.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EventManagement.Pages.Bookings
 {
+    [Authorize(Roles = "organizer,admin")]
     public class IndexModel : PageModel
     {
         private readonly EventManagement.Models.EventManagementContext _context;

@@ -7,16 +7,23 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EventManagement.Models;
+using Microsoft.AspNetCore.Authorization;
+using EventManagement.Helpers;
+using Microsoft.AspNetCore.SignalR;
+using EventManagement.Hubs;
 
 namespace EventManagement.Pages.Events
 {
+    [Authorize(Roles = "organizer,admin")]
     public class EditModel : PageModel
     {
         private readonly EventManagement.Models.EventManagementContext _context;
+        private readonly IHubContext<EventHub> _hubContext;
 
-        public EditModel(EventManagement.Models.EventManagementContext context)
+        public EditModel(EventManagement.Models.EventManagementContext context, IHubContext<EventHub> hubContext)
         {
             _context = context;
+            _hubContext = hubContext;
         }
 
         [BindProperty]
@@ -29,21 +36,23 @@ namespace EventManagement.Pages.Events
                 return NotFound();
             }
 
-            var @event =  await _context.Events.FirstOrDefaultAsync(m => m.EventId == id);
+            var @event = await _context.Events.FirstOrDefaultAsync(m => m.EventId == id);
             if (@event == null)
             {
                 return NotFound();
             }
+
+            if (!User.IsEventOwner(@event.OrganizerId)) Forbid();
+
             Event = @event;
-           ViewData["OrganizerId"] = new SelectList(_context.Users, "UserId", "UserId");
-           ViewData["VenueId"] = new SelectList(_context.Venues, "VenueId", "VenueId");
+            ViewData["VenueId"] = new SelectList(_context.Venues, "VenueId", "Name");
             return Page();
         }
 
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
+            ModelState.Remove("Event.Organizer");
+            ModelState.Remove("Event.Venue");
             if (!ModelState.IsValid)
             {
                 return Page();
@@ -54,6 +63,7 @@ namespace EventManagement.Pages.Events
             try
             {
                 await _context.SaveChangesAsync();
+                await _hubContext.Clients.All.SendAsync("EventReload");
             }
             catch (DbUpdateConcurrencyException)
             {

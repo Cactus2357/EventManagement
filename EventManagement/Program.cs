@@ -1,5 +1,6 @@
 using EventManagement.Hubs;
 using EventManagement.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,14 @@ builder.Services.AddSignalR(o => o.EnableDetailedErrors = true);
 // Register the DbContext with dependency injection
 builder.Services.AddDbContext<EventManagementContext>
     (options => options.UseSqlServer(builder.Configuration.GetConnectionString("MyCnn")));
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Auth/Signin";
+        options.LogoutPath = "/Auth/Signout";
+        options.AccessDeniedPath = "/Auth/AccessDenied";
+    });
 
 var app = builder.Build();
 
@@ -28,14 +37,17 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapHub<EventHub>("/EventHub");
 app.MapGet("/", context =>
 {
-    context.Response.Redirect("/Events");
+    context.Response.Redirect("/Events/Index");
     return Task.CompletedTask;
 });
+
+app.UseStatusCodePagesWithReExecute("/Shared/Error{0}");
 
 app.MapRazorPages();
 

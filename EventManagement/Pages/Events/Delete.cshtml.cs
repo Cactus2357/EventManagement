@@ -1,21 +1,28 @@
-﻿using System;
+﻿using EventManagement.Helpers;
+using EventManagement.Hubs;
+using EventManagement.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using EventManagement.Models;
 
 namespace EventManagement.Pages.Events
 {
+    [Authorize(Roles = "organizer,admin")]
     public class DeleteModel : PageModel
     {
         private readonly EventManagement.Models.EventManagementContext _context;
+        private readonly IHubContext<EventHub> _hubContext;
 
-        public DeleteModel(EventManagement.Models.EventManagementContext context)
+        public DeleteModel(EventManagement.Models.EventManagementContext context, IHubContext<EventHub> hubContext)
         {
             _context = context;
+            _hubContext = hubContext;
         }
 
         [BindProperty]
@@ -51,9 +58,12 @@ namespace EventManagement.Pages.Events
             var @event = await _context.Events.FindAsync(id);
             if (@event != null)
             {
+                if (!User.IsEventOwner(@event.OrganizerId)) Forbid();
+
                 Event = @event;
                 _context.Events.Remove(Event);
                 await _context.SaveChangesAsync();
+                await _hubContext.Clients.All.SendAsync("EventReload");
             }
 
             return RedirectToPage("./Index");

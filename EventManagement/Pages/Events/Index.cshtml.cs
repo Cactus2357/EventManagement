@@ -18,13 +18,25 @@ namespace EventManagement.Pages.Events
             _context = context;
         }
 
-        public IList<Event> Event { get;set; } = default!;
+        public IList<Event> UpcommingEvents { get; set; } = default!;
+
+        [BindProperty(SupportsGet = true)]
+        public int CurrentPage { get; set; } = 1;
+        public int Count { get; set; }
+        public int PageSize { get; set; } = 12;
+        public int TotalPages => (int)Math.Ceiling(decimal.Divide(Count, PageSize));
 
         public async Task OnGetAsync()
         {
-            Event = await _context.Events
-                .Include(@event => @event.Organizer)
-                .Include(@event => @event.Venue).ToListAsync();
+            Count = await _context.Events.CountAsync();
+
+            UpcommingEvents = await _context.Events
+                .Where(@e => e.Status.Equals("upcoming"))
+                .OrderBy(e => e.StartTime)
+                .Skip((CurrentPage - 1) * PageSize)
+                .Take(PageSize)
+                .Include(@event => @event.Organizer).Include(@event => @event.Venue)
+                .ToListAsync();
         }
     }
 }

@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using EventManagement.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using EventManagement.Models;
+using EventManagement.Helpers;
 
 namespace EventManagement.Pages.Users
 {
+    //[Authorize(Roles = "admin")]
     public class EditModel : PageModel
     {
         private readonly EventManagement.Models.EventManagementContext _context;
@@ -20,7 +17,7 @@ namespace EventManagement.Pages.Users
         }
 
         [BindProperty]
-        public User User { get; set; } = default!;
+        public User UserModel { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -34,12 +31,13 @@ namespace EventManagement.Pages.Users
             {
                 return NotFound();
             }
-            User = user;
+
+            if (!(User.IsAdmin() || User.GetCurrentUserId() == id)) return Forbid();
+
+            UserModel = user;
             return Page();
         }
 
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
@@ -47,7 +45,7 @@ namespace EventManagement.Pages.Users
                 return Page();
             }
 
-            _context.Attach(User).State = EntityState.Modified;
+            _context.Attach(UserModel).State = EntityState.Modified;
 
             try
             {
@@ -55,7 +53,7 @@ namespace EventManagement.Pages.Users
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!UserExists(User.UserId))
+                if (!UserExists(UserModel.UserId))
                 {
                     return NotFound();
                 }

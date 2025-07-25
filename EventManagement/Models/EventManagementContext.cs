@@ -68,7 +68,7 @@ public partial class EventManagementContext : DbContext
             entity.HasOne(d => d.Venue).WithMany(p => p.Events)
                 .HasForeignKey(d => d.VenueId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Events__venue_id__403A8C7D");
+                .HasConstraintName("FK__Events__venue_id__6E01572D");
         });
 
         modelBuilder.Entity<Feedback>(entity =>
@@ -157,10 +157,16 @@ public partial class EventManagementContext : DbContext
 
             entity.Property(e => e.TicketId).HasColumnName("ticket_id");
             entity.Property(e => e.EventId).HasColumnName("event_id");
+            entity.Property(e => e.ExpiryDate)
+                .HasColumnType("datetime")
+                .HasColumnName("expiry_date");
             entity.Property(e => e.Price)
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("price");
             entity.Property(e => e.Quantity).HasColumnName("quantity");
+            entity.Property(e => e.StartDate)
+                .HasColumnType("datetime")
+                .HasColumnName("start_date");
             entity.Property(e => e.Type)
                 .HasMaxLength(50)
                 .IsUnicode(false)

@@ -1,13 +1,12 @@
 ﻿@page
 @model EventManagement.Pages.Events.DetailsModel
+@using EventManagement.Models
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = Model.Event.Title;
 }
 
-<h1>Details</h1>
-
-<div>
+@* <div>
     <h4>Event</h4>
     <hr />
     <dl class="row">
@@ -54,8 +53,186 @@
             @Html.DisplayFor(model => model.Event.Venue.VenueId)
         </dd>
     </dl>
-</div>
+</div> *@
 <div>
-    <a asp-page="./Edit" asp-route-id="@Model.Event.EventId">Edit</a> |
-    <a asp-page="./Index">Back to List</a>
+    @if (User.IsInRole("organizer") || User.IsInRole("admin"))
+    {
+        <a asp-page="./Edit" asp-route-id="@Model.Event.EventId">Edit</a>
+    }
+    <a asp-page="./Index">Back</a>
 </div>
+
+<div class="container">
+    <h2>
+        @Model.Event.Title
+        @{
+            string color = Model.Event.Status switch
+            {
+                "upcoming" => "primary",
+                "completed" => "success",
+                "cancelled" => "secondary",
+                _ => "dark",
+            };
+
+            <span class="badge rounded-pill bg-@color">@Model.Event.Status</span>
+        }
+    </h2>
+    <p>
+        <figcaption class="blockquote-footer mb-0 text-muted">
+            Organized by <a asp-page="/Users/Details" asp-route-id="@Model.Event.OrganizerId">@Model.Event.Organizer.Name</a>
+        </figcaption>
+    </p>
+
+    <ul class="nav nav-tabs" id="eventTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button" role="tab">Details</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="schedules-tab" data-bs-toggle="tab" data-bs-target="#schedules" type="button" role="tab">Schedules</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tickets-tab" data-bs-toggle="tab" data-bs-target="#tickets" type="button" role="tab">Available Tickets</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="feedbacks-tab" data-bs-toggle="tab" data-bs-target="#feedbacks" type="button" role="tab">Feedbacks</button>
+        </li>
+    </ul>
+
+    <div class="tab-content pt-3" id="eventTabContent">
+        <div class="tab-pane pt-4 fade show active" id="details" role="tabpanel" aria-labelledby="details-tab">
+            <h5>Event Description</h5>
+            <p>@Model.Event.Description</p>
+            <div class="row">
+                <div class="col-6">
+                    <h5>Location: @Model.Event.Venue.Name</h5>
+                    @* <p><a asp-page="/Venues/Details" asp-route-id="@Model.Event.VenueId">@Model.Event.Venue.Name</a></p> *@
+                    <p><b>Address:</b> @Model.Event.Venue.Address</p>
+                    <p><b>Capacity:</b> @Model.Event.Venue.Capacity guests</p>
+                </div>
+                <div class="col-6">
+                    @{
+                        int duration = (int)(Model.Event.EndTime - Model.Event.StartTime).TotalHours;
+                    }
+                    <h5>Event Dates (duration: @duration hours)</h5>
+                    <p><b>Start Date:</b> @Model.Event.StartTime.ToString("MMMM dd, yyyy 'at' hh:mm tt")</p>
+                    <p><b>End Date:</b> @Model.Event.EndTime.ToString("MMMM dd, yyyy 'at' hh:mm tt")</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane pt-4 fade" id="schedules" role="tabpanel" aria-labelledby="schedules-tab">
+            @* <p>Event schedules content here...</p> *@
+            @if (Model.ScheduleItems.Count == 0)
+            {
+                <p class="text-muted text-center">No schedules for this event.</p>
+            }
+            else
+            {
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>@Html.DisplayNameFor(model => model.ScheduleItems[0].Title)</th>
+                            <th>@Html.DisplayNameFor(model => model.ScheduleItems[0].Speaker)</th>
+                            <th>@Html.DisplayNameFor(model => model.ScheduleItems[0].StartTime)</th>
+                            <th>@Html.DisplayNameFor(model => model.ScheduleItems[0].EndTime)</th>
+                            @if (User.IsInRole("organizer") || User.IsInRole("admin"))
+                            {
+                                <th></th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.ScheduleItems)
+                        {
+                            <tr>
+                                <td>@Html.DisplayFor(modelItem => item.Title)</td>
+                                <td>@Html.DisplayFor(modelItem => item.Speaker)</td>
+                                <td>@Html.DisplayFor(modelItem => item.StartTime)</td>
+                                <td>@Html.DisplayFor(modelItem => item.EndTime)</td>
+                                @if (User.IsInRole("organizer") || User.IsInRole("admin"))
+                                {
+                                    <td>
+                                        <a asp-page="./Edit" asp-route-id="@item.ItemId">Edit</a> |
+                                        <a asp-page="./Details" asp-route-id="@item.ItemId">Details</a> |
+                                        <a asp-page="./Delete" asp-route-id="@item.ItemId">Delete</a>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+
+        <div class="tab-pane pt-4 fade" id="tickets" role="tabpanel" aria-labelledby="tickets-tab">
+            @* <p>Available tickets content here...</p> *@
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>@Html.DisplayNameFor(model => model.Tickets[0].Type)</th>
+                        <th>@Html.DisplayNameFor(model => model.Tickets[0].Price)</th>
+                        <th>@Html.DisplayNameFor(model => model.Tickets[0].Quantity)</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Tickets)
+                    {
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => item.Type)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Price)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Quantity)</td>
+                            <td>
+                                <a asp-page="./Edit" asp-route-id="@item.TicketId">Edit</a> |
+                                <a asp-page="./Details" asp-route-id="@item.TicketId">Details</a> |
+                                <a asp-page="./Delete" asp-route-id="@item.TicketId">Delete</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="tab-pane pt-4 fade" id="feedbacks" role="tabpanel" aria-labelledby="feedbacks-tab">
+            <div class="container align-items-center">
+                @foreach (var o in Model.Feedbacks)
+                {
+                    <div class="card w-50 mx-auto mb-2">
+                        <div class="card-header">
+                            <span class="me-3">@o.User.Name</span>
+                            <span class="me-3">@o.Rating out of 5</span>
+                            <span class="me-3">@o.SubmittedAt.Value.ToShortDateString()</span>
+                        </div>
+                        <div class="card-body py-2">
+                            @o.Comment
+                        </div>
+                    </div>
+                }
+                @if (Model.Feedbacks.Count == 0)
+                {
+                    <p class="text-muted text-center">No feedback submitted for this event.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/EventHub")
+            .build();
+
+        connection.on("EventReload", function (eventTitle) {
+            alert("A new event was added: " + eventTitle);
+            location.reload();
+        });
+
+        connection.start().catch(function (err) {
+            return console.error(err.toString());
+        });
+    </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

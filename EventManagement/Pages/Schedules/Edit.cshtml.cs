@@ -1,15 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using EventManagement.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using EventManagement.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace EventManagement.Pages.Schedules
 {
+    [Authorize(Roles = "organizer,admin")]
     public class EditModel : PageModel
     {
         private readonly EventManagement.Models.EventManagementContext _context;
@@ -35,7 +37,7 @@ namespace EventManagement.Pages.Schedules
                 return NotFound();
             }
             ScheduleItem = scheduleitem;
-           ViewData["EventId"] = new SelectList(_context.Events, "EventId", "EventId");
+           ViewData["EventId"] = new SelectList(_context.Events, "EventId", "Title");
             return Page();
         }
 

@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# SQL Server Management Studio Version 21
+# Visual Studio Version 17
 VisualStudioVersion = 17.14.36221.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventManagement", "EventManagement\EventManagement.csproj", "{9EF31628-672A-4FC1-A315-DD87EC2671ED}"
@@ -17,9 +17,6 @@ Global
 		{9EF31628-672A-4FC1-A315-DD87EC2671ED}.Default|Any CPU.ActiveCfg = Release|Any CPU
 		{9EF31628-672A-4FC1-A315-DD87EC2671ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9EF31628-672A-4FC1-A315-DD87EC2671ED}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E9A2698B-A9B2-421A-B375-EEF12ABD522E}.Debug|Any CPU.ActiveCfg = Default
-		{E9A2698B-A9B2-421A-B375-EEF12ABD522E}.Default|Any CPU.ActiveCfg = Default
-		{E9A2698B-A9B2-421A-B375-EEF12ABD522E}.Release|Any CPU.ActiveCfg = Default
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

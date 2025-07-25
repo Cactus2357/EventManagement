@@ -1,17 +1,21 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@using System.Security.Claims
+@using EventManagement.Helpers
+
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
 @addTagHelper *,Microsoft.AspNetCore.Mvc.TagHelpers
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - EventManagement</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/EventManagement.styles.css" asp-append-version="true" />
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm border-bottom box-shadow mb-3">
             <div class="container">
                 <a class="navbar-brand" asp-area="" asp-page="/Index">EventManagement</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
@@ -21,24 +25,57 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
+                            <a class="nav-link text-body" asp-area="" asp-page="/Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
+                            <a class="nav-link text-body" asp-area="" asp-page="/Privacy">Privacy</a>
                         </li>
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a class="nav-link dropdown-toggle text-body" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Dropdown link
                             </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" asp-page="/Events/Index">Events Management</a></li>
-                                <li><a class="dropdown-item" asp-page="/Venues/Index">Venue Management</a></li>
-                                <li><a class="dropdown-item" asp-page="/Tickets/Index">Ticketing</a></li>
-                                <li><a class="dropdown-item" asp-page="/Bookings/Index">Registrations (Bookings)</a></li>
-                                <li><a class="dropdown-item" asp-page="/Schedules/Index">Schedule Items (Sessions)</a></li>
+                            <ul class=" dropdown-menu">
+                                <li><a class="dropdown-item" asp-page="/Events/Index">Events</a></li>
+                                <li><a class="dropdown-item" asp-page="/Schedules/Index">Events Schedule (Sessions)</a></li>
+                                @if (User.Identity.IsAuthenticated && User.IsInRole("organizer"))
+                                {
+                                    <li><a class="dropdown-item" asp-page="/Venues/Index">Venue Management</a></li>
+                                    <li><a class="dropdown-item" asp-page="/Tickets/Index">Ticketing</a></li>
+                                }
+                                @if (User.IsInAnyRole("admin"))
+                                {
+                                    <li><a class="dropdown-item" asp-page="/Bookings/Index">Registrations (Bookings)</a></li>
+                                    <li><a class="dropdown-item" asp-page="/Venues/Index">Venue Management</a></li>
+                                    <li><a class="dropdown-item" asp-page="/Tickets/Index">Ticketing</a></li>
+                                    <li><a class="dropdown-item" asp-page="/Bookings/Index">Registrations (Bookings)</a></li>
+                                    <li><a class="dropdown-item" asp-page="/Users/Index">Manage Users</a></li>
+                                }
                             </ul>
                         </li>
                     </ul>
+                </div>
+                <div class="d-flex justify-content-between">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        string userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+                        string color = userRole switch
+                        {
+                            "admin" => "danger",
+                            "organizer" => "primary",
+                            "attendee" => "success",
+                            _ => "secondary",
+                        };
+
+                        <a class="nav-link text-body" asp-page="/Users/Details" asp-route-id="@User.GetCurrentUserId()">
+                            Your Profile <span class="badge bg-@color">@userRole</span>
+                        </a>
+                        <a class="nav-link text-body" asp-page="/Auth/Signout">Sign out</a>
+                    }
+                    else
+                    {
+                        <a class="nav-link text-body" asp-page="/Auth/Signin">Sign in</a>
+                        <a class="nav-link text-body" asp-page="/Auth/Signup">Sign up</a>
+                    }
                 </div>
             </div>
         </nav>
@@ -56,7 +93,8 @@
     </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/microsoft/signalr/dist/browser/signalr.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)

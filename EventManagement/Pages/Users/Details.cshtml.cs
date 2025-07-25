@@ -19,6 +19,8 @@ namespace EventManagement.Pages.Users
         }
 
         public User User { get; set; } = default!;
+        public IList<Event> Events { get; set; } = default!;
+        public IList<Registration> Registrations { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -32,10 +34,20 @@ namespace EventManagement.Pages.Users
             {
                 return NotFound();
             }
-            else
-            {
-                User = user;
-            }
+
+            User = user;
+            Events = await _context.Registrations
+                .Where(r => r.UserId == id)
+                .Include(r => r.Ticket)
+                .ThenInclude(t => t.Event)
+                .Select(r => r.Ticket.Event)
+                .ToListAsync();
+
+            Registrations = await _context.Registrations
+                .Where(r => r.UserId == id)
+                .Include(r => r.Ticket).ThenInclude(t => t.Event)
+                .ToListAsync();
+
             return Page();
         }
     }

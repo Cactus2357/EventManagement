@@ -2,14 +2,17 @@
 @model EventManagement.Pages.Schedules.IndexModel
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Schedules";
 }
 
-<h1>Index</h1>
+<h1>Schedules</h1>
 
-<p>
-    <a asp-page="Create">Create New</a>
-</p>
+@if (User.IsInRole("organizer") || User.IsInRole("admin"))
+{
+    <p>
+        <a asp-page="Create">Create New</a>
+    </p>
+}
 <table class="table">
     <thead>
         <tr>
@@ -28,33 +31,41 @@
             <th>
                 @Html.DisplayNameFor(model => model.ScheduleItem[0].Event)
             </th>
-            <th></th>
+            @if (User.IsInRole("organizer") || User.IsInRole("admin"))
+            {
+                <th></th>
+            }
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model.ScheduleItem) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Speaker)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.StartTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.EndTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Event.EventId)
-            </td>
-            <td>
-                <a asp-page="./Edit" asp-route-id="@item.ItemId">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.ItemId">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.ItemId">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model.ScheduleItem)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Title)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Speaker)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.StartTime)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EndTime)
+                </td>
+                <td>
+                    <a asp-page="/Events/Details" asp-route-id="@item.Event.EventId">@Html.DisplayFor(modelItem => item.Event.Title)</a>
+                </td>
+
+                @if (User.IsInRole("organizer") || User.IsInRole("admin"))
+                {
+                    <td>
+                        <a asp-page="./Edit" asp-route-id="@item.ItemId">Edit</a> |
+                        <a asp-page="./Details" asp-route-id="@item.ItemId">Details</a> |
+                        <a asp-page="./Delete" asp-route-id="@item.ItemId">Delete</a>
+                    </td>
+                }
+            </tr>
+        }
     </tbody>
 </table>

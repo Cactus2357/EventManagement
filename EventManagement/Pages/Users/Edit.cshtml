@@ -13,31 +13,26 @@
     <div class="col-md-4">
         <form method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="User.UserId" />
+            <input type="hidden" asp-for="UserModel.UserId" />
             <div class="form-group">
-                <label asp-for="User.Name" class="control-label"></label>
-                <input asp-for="User.Name" class="form-control" />
-                <span asp-validation-for="User.Name" class="text-danger"></span>
+                <label asp-for="UserModel.Name" class="control-label"></label>
+                <input asp-for="UserModel.Name" class="form-control" />
+                <span asp-validation-for="UserModel.Name" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="User.Email" class="control-label"></label>
-                <input asp-for="User.Email" class="form-control" />
-                <span asp-validation-for="User.Email" class="text-danger"></span>
+                <label asp-for="UserModel.Email" class="control-label"></label>
+                <input asp-for="UserModel.Email" class="form-control" />
+                <span asp-validation-for="UserModel.Email" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="User.PasswordHash" class="control-label"></label>
-                <input asp-for="User.PasswordHash" class="form-control" />
-                <span asp-validation-for="User.PasswordHash" class="text-danger"></span>
+                <label asp-for="UserModel.Role" class="control-label"></label>
+                <input asp-for="UserModel.Role" class="form-control" />
+                <span asp-validation-for="UserModel.Role" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="User.Role" class="control-label"></label>
-                <input asp-for="User.Role" class="form-control" />
-                <span asp-validation-for="User.Role" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="User.CreatedAt" class="control-label"></label>
-                <input asp-for="User.CreatedAt" class="form-control" />
-                <span asp-validation-for="User.CreatedAt" class="text-danger"></span>
+                <label asp-for="UserModel.CreatedAt" class="control-label"></label>
+                <input asp-for="UserModel.CreatedAt" class="form-control" />
+                <span asp-validation-for="UserModel.CreatedAt" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />

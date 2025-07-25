@@ -19,42 +19,54 @@
             <th>
                 @Html.DisplayNameFor(model => model.User[0].Email)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.User[0].PasswordHash)
-            </th>
+            @if (User.IsInRole("admin"))
+            {
+                <th>
+                    @Html.DisplayNameFor(model => model.User[0].PasswordHash)
+                </th>
+            }
             <th>
                 @Html.DisplayNameFor(model => model.User[0].Role)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.User[0].CreatedAt)
             </th>
-            <th></th>
+            @if (User.IsInRole("admin")){<th></th>}
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model.User) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PasswordHash)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Role)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedAt)
-            </td>
-            <td>
-                <a asp-page="./Edit" asp-route-id="@item.UserId">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.UserId">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.UserId">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model.User)
+        {
+            <tr>
+                <td>
+                    <a asp-page="./Details" asp-route-id="@item.UserId">@Html.DisplayFor(modelItem => item.Name)</a>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Email)
+                </td>
+                @if (User.IsInRole("admin"))
+                {
+                    <td>
+                        @Html.DisplayFor(modelItem => item.PasswordHash)
+                    </td>
+
+                }
+                <td>
+                    @Html.DisplayFor(modelItem => item.Role)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CreatedAt)
+                </td>
+                @if (User.IsInRole("admin"))
+                {
+                <td>
+                    <a asp-page="./Edit" asp-route-id="@item.UserId">Edit</a> |
+                    <a asp-page="./Details" asp-route-id="@item.UserId">Details</a> |
+                    <a asp-page="./Delete" asp-route-id="@item.UserId">Delete</a>
+                </td>
+                    
+                }
+            </tr>
+        }
     </tbody>
 </table>
