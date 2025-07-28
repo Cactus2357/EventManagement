@@ -52,7 +52,10 @@
         <div class="mb-3">
             <div class="d-flex align-items-center gap-2">
                 <h4>Events Managed</h4>
-                <a asp-page="/Events/Manage">Manage your events</a>
+                @if (User.GetCurrentUserId() == Model.CurrentUser.UserId)
+                {
+                    <a asp-page="/Events/Manage">Manage your events</a>
+                }
             </div>
             <ul>
                 @foreach (var e in Model.ManagedEvents)
