@@ -9,9 +9,11 @@ public partial class Feedback
     public int FeedbackId { get; set; }
 
     [Required]
+    [Display(Name = "User")]
     public int UserId { get; set; }
 
     [Required]
+    [Display(Name = "Event")]
     public int EventId { get; set; }
 
     [Range(1, 5, ErrorMessage = "Rating must be between 1 and 5.")]

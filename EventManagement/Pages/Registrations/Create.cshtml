@@ -1,0 +1,133 @@
+﻿@page
+@model EventManagement.Pages.Registrations.CreateModel
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+<h1>
+    Register to
+    @if (Model.Event != null)
+    {
+        <a asp-page="/Events/Details" asp-route-id="@Model.Event.EventId">@Model.Event.Title</a>
+    }
+    else
+    {
+        <span>Unknown Event</span>
+    }
+</h1>
+<hr />
+
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group mb-3">
+                <span class="text-danger">*</span>
+                <label asp-for="Registration.TicketId" class="control-label"></label>
+                <select asp-for="Registration.TicketId" class="form-select" id="ticketSelect" aria-describedby="ticketTimeFrame">
+                    @foreach (var ticket in Model.Ticket)
+                    {
+                        <option value="@ticket.TicketId"
+                                data-price="@ticket.Price"
+                                data-left="@(ticket.Quantity - ticket.Registrations.Count)"
+                                data-start="@ticket.StartDate?.ToString("o")"
+                                data-expiry="@ticket.ExpiryDate?.ToString("o")">
+                            @ticket.Type (@ticket.Price)$ - @(ticket.Quantity - ticket.Registrations.Sum(r => r.Quantity)) left
+                        </option>
+                    }
+                </select>
+                <div id="ticketTimeFrame" class="form-text"></div>
+                <span asp-validation-for="Registration.TicketId" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <span class="text-danger">*</span>
+                <label asp-for="Registration.Quantity" class="control-label"></label>
+                <input type="number" asp-for="Registration.Quantity" class="form-control" id="quantityInput" min="1" value="1" />
+                <span asp-validation-for="Registration.Quantity" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <p id="totalPrice">Total: 0$</p>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script>
+    $(() => {
+        const $quantityInput = $('#quantityInput');
+        const $ticketSelect = $("#ticketSelect");
+        const $totalPrice = $('#totalPrice');
+        const $ticketTimeFrame = $('#ticketTimeFrame');
+
+        let price = 0;
+        let left = 0;
+        let quantity = 0;
+        let start, expiry;
+
+        function formatDateTime(value) {
+            if (!value) return null;
+            const dt = new Date(value);
+            if (isNaN(dt)) return null;
+            return dt.toLocaleString(undefined, {
+                dateStyle: "long",
+                timeStyle: "short"
+            });
+        }
+
+        function updateDisplay() {
+            const total = quantity * price;
+
+            const formattedStart = formatDateTime(start);
+            const formattedExpiry = formatDateTime(expiry);
+
+            if (formattedStart && formattedExpiry) {
+                $ticketTimeFrame.html(`This ticket is available for registration from <strong>${formattedStart}</strong> to <strong>${formattedExpiry}</strong>.`);
+            } else {
+                $ticketTimeFrame.html(`<span class="text-muted">No valid registration timeframe is set for this ticket.</span>`);
+            }
+
+            $totalPrice.html(`Total: $${total.toFixed(2)}`);
+        }
+
+        function getInput() {
+            const selected = $ticketSelect.get(0).selectedOptions[0];
+            price = parseFloat(selected.dataset.price);
+            left = parseInt(selected.dataset.left);
+            start = selected.dataset.start;
+            expiry = selected.dataset.expiry;
+
+            quantity = parseInt($quantityInput.val()) || 0;
+            $quantityInput.attr("min", 1);
+            $quantityInput.attr("max", left);
+
+            if (quantity > left) {
+                quantity = left;
+                $quantityInput.val(left);
+            }
+        }
+
+        $ticketSelect.on('change', () => {
+            getInput();
+            updateDisplay();
+        });
+
+        $quantityInput.on('input', () => {
+            getInput();
+            updateDisplay();
+        });
+
+        getInput();
+        updateDisplay();
+    });
+</script>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

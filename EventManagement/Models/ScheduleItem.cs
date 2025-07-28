@@ -9,6 +9,7 @@ public partial class ScheduleItem
 {
     public int ItemId { get; set; }
 
+    [Required(ErrorMessage = "Event is required")]
     public int EventId { get; set; }
 
     [Required(ErrorMessage = "Title is required.")]

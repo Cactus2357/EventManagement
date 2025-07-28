@@ -1,5 +1,6 @@
 ﻿@page
 @model EventManagement.Pages.Events.DetailsModel
+@using EventManagement.Helpers
 @using EventManagement.Models
 
 @{
@@ -55,7 +56,7 @@
     </dl>
 </div> *@
 <div>
-    @if (User.IsInRole("organizer") || User.IsInRole("admin"))
+    @if (User.IsAdminOrOrganizer())
     {
         <a asp-page="./Edit" asp-route-id="@Model.Event.EventId">Edit</a>
     }
@@ -100,8 +101,10 @@
 
     <div class="tab-content pt-3" id="eventTabContent">
         <div class="tab-pane pt-4 fade show active" id="details" role="tabpanel" aria-labelledby="details-tab">
-            <h5>Event Description</h5>
-            <p>@Model.Event.Description</p>
+            <div class="mb-5">
+                <h5>Event Description</h5>
+                <p>@Model.Event.Description</p>
+            </div>
             <div class="row">
                 <div class="col-6">
                     <h5>Location: @Model.Event.Venue.Name</h5>
@@ -135,7 +138,7 @@
                             <th>@Html.DisplayNameFor(model => model.ScheduleItems[0].Speaker)</th>
                             <th>@Html.DisplayNameFor(model => model.ScheduleItems[0].StartTime)</th>
                             <th>@Html.DisplayNameFor(model => model.ScheduleItems[0].EndTime)</th>
-                            @if (User.IsInRole("organizer") || User.IsInRole("admin"))
+                            @if (User.IsAdminOrOrganizer())
                             {
                                 <th></th>
                             }
@@ -149,7 +152,7 @@
                                 <td>@Html.DisplayFor(modelItem => item.Speaker)</td>
                                 <td>@Html.DisplayFor(modelItem => item.StartTime)</td>
                                 <td>@Html.DisplayFor(modelItem => item.EndTime)</td>
-                                @if (User.IsInRole("organizer") || User.IsInRole("admin"))
+                                @if (User.IsAdminOrOrganizer())
                                 {
                                     <td>
                                         <a asp-page="./Edit" asp-route-id="@item.ItemId">Edit</a> |
@@ -171,8 +174,11 @@
                     <tr>
                         <th>@Html.DisplayNameFor(model => model.Tickets[0].Type)</th>
                         <th>@Html.DisplayNameFor(model => model.Tickets[0].Price)</th>
-                        <th>@Html.DisplayNameFor(model => model.Tickets[0].Quantity)</th>
-                        <th></th>
+                        <th>Available</th>
+                        @if (User.IsAdminOrOrganizer())
+                        {
+                            <th></th>
+                        }
                     </tr>
                 </thead>
                 <tbody>
@@ -181,27 +187,91 @@
                         <tr>
                             <td>@Html.DisplayFor(modelItem => item.Type)</td>
                             <td>@Html.DisplayFor(modelItem => item.Price)</td>
-                            <td>@Html.DisplayFor(modelItem => item.Quantity)</td>
-                            <td>
-                                <a asp-page="./Edit" asp-route-id="@item.TicketId">Edit</a> |
-                                <a asp-page="./Details" asp-route-id="@item.TicketId">Details</a> |
-                                <a asp-page="./Delete" asp-route-id="@item.TicketId">Delete</a>
-                            </td>
+                            <td>@(item.Quantity - item.Registrations.Sum(r => r.Quantity))</td>
+                            @if (User.IsAdminOrOrganizer())
+                            {
+                                <td>
+                                    <a asp-page="./Edit" asp-route-id="@item.TicketId">Edit</a> |
+                                    <a asp-page="./Details" asp-route-id="@item.TicketId">Details</a> |
+                                    <a asp-page="./Delete" asp-route-id="@item.TicketId">Delete</a>
+                                </td>
+                            }
                         </tr>
                     }
                 </tbody>
             </table>
+            <div class="mb-5">
+                <a class="btn btn-primary" asp-page="/Registrations/Create" asp-route-eventId="@Model.Event.EventId">Register Now</a>
+            </div>
+            @if (Model.Registrations.Count > 0)
+            {
+                <hr />
+                <h5>Your Registrations</h5>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>@Html.DisplayNameFor(model => model.Registrations[0].Ticket.Type)</th>
+                            <th>@Html.DisplayNameFor(model => model.Registrations[0].Quantity)</th>
+                            <th>@Html.DisplayNameFor(model => model.Registrations[0].RegisteredAt)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Registrations)
+                        {
+                            <tr>
+                                <td>@item.Ticket.Type</td>
+                                <td>@item.Quantity</td>
+                                <td>@item.RegisteredAt!.Value.ToString()</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
         </div>
 
         <div class="tab-pane pt-4 fade" id="feedbacks" role="tabpanel" aria-labelledby="feedbacks-tab">
-            <div class="container align-items-center">
+            @if (User.Identity!.IsAuthenticated && Model.Feedbacks.FirstOrDefault(o => o.UserId == User.GetCurrentUserId()) == null)
+            {
+                <div class="container row mb-3">
+                    @* <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#feedbackModal">
+                            Leave Feedback
+                        </button>
+                        <!-- Feedback Modal -->
+                        <div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                </div>
+                            </div>
+                        </div> *@
+                    <div class="card col-xl-9 mx-auto">
+                        <div class="card-body">
+                            <h5 class="card-title">Send feedback</h5>
+                            <form id="feedbackForm">
+                                <input type="hidden" name="EventId" value="@Model.Event.EventId" />
+                                <div class="mb-3">
+                                    <label for="Rating" class="form-label">Rating (1–5)</label>
+                                    <input type="number" name="Rating" min="1" max="5" class="form-control" required />
+                                </div>
+                                <div class="mb-3">
+                                    <textarea name="Comment" class="form-control" placeholder="Comment" required></textarea>
+                                </div>
+                                <div id="feedbackMessage" class="text-success mb-2"></div>
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+                <hr />
+            }
+            <div class="container">
+                <h5 class="ms-5 mb-3">Feedbacks</h5>
                 @foreach (var o in Model.Feedbacks)
                 {
                     <div class="card w-50 mx-auto mb-2">
                         <div class="card-header">
-                            <span class="me-3">@o.User.Name</span>
-                            <span class="me-3">@o.Rating out of 5</span>
-                            <span class="me-3">@o.SubmittedAt.Value.ToShortDateString()</span>
+                            <span class="me-3">@(o.UserId == User.GetCurrentUserId() ? "You" : o.User.Name)</span>
+                            <span class="me-3">(@o.Rating / 5)</span> -- <span class="me-3">@o.SubmittedAt!.Value.ToShortDateString()</span>
                         </div>
                         <div class="card-body py-2">
                             @o.Comment
@@ -212,6 +282,7 @@
                 {
                     <p class="text-muted text-center">No feedback submitted for this event.</p>
                 }
+
             </div>
         </div>
     </div>
@@ -231,6 +302,41 @@
         connection.start().catch(function (err) {
             return console.error(err.toString());
         });
+
+        $("#feedbackForm").submit(function (e) {
+            e.preventDefault();
+
+            const formData = $(this).serialize();
+
+            $.ajax({
+                type: "POST",
+                url: "/api/feedback",
+                data: formData,
+                success: function (response) {
+                    $("#feedbackMessage").text("Feedback submitted successfully.");
+                    $("#feedbackForm")[0].reset();
+                },
+                error: function (xhr) {
+                    let response = xhr.responseJSON;
+                    let messages = [];
+
+                    if (response?.errors) {
+                        for (const key in response.errors) {
+                            messages.push(response.errors[key].join(" "));
+                        }
+                    } else {
+                        messages.push("Failed to submit feedback.");
+                    }
+
+                    $("#feedbackMessage")
+                        .removeClass("text-success")
+                        .addClass("text-danger")
+                        .html(messages.join("<br/>"));
+                }
+
+            });
+        });
+
     </script>
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");

@@ -23,8 +23,10 @@
     }
 
     <div class="d-flex justify-content-between mb-3">
+        <div>
+            Don't have an account? <a asp-page="/Auth/Signup">Sign up</a>
+        </div>
         <a asp-page="/Auth/ForgotPassword">Forgot password?</a>
-        <a asp-page="/Auth/Signup">Sign up</a>
     </div>
 
     <input class="btn btn-success w-100" type="submit" value="Login" />

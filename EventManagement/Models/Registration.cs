@@ -12,9 +12,11 @@ public partial class Registration
     public int RegistrationId { get; set; }
 
     [Required(ErrorMessage = "User is required.")]
+    [Display(Name = "User")]
     public int UserId { get; set; }
 
     [Required(ErrorMessage = "Ticket is required.")]
+    [Display(Name = "Ticket")]
     public int TicketId { get; set; }
 
     [Required(ErrorMessage = "Quantity is required.")]

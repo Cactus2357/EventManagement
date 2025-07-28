@@ -50,5 +50,6 @@ app.MapGet("/", context =>
 app.UseStatusCodePagesWithReExecute("/Shared/Error{0}");
 
 app.MapRazorPages();
+app.MapControllers();
 
 app.Run();

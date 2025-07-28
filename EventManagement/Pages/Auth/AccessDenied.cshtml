@@ -4,5 +4,12 @@
     ViewData["Title"] = "Access Denied";
 }
 
-<h2>Access Denied</h2>
-<p>You do not have permission to access this page.</p>
+@if (!User.Identity.IsAuthenticated)
+{
+    <h2>Unauthenticated</h2>
+    <p>Please <a asp-page="/Auth/Signin">log in</a> to access this page.</p>
+} else
+{
+    <h2>Access Denied</h2>
+    <p>You do not have permission to access this page.</p>
+}

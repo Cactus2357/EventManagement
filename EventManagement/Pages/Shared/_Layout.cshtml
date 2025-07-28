@@ -37,7 +37,7 @@
                             <ul class=" dropdown-menu">
                                 <li><a class="dropdown-item" asp-page="/Events/Index">Events</a></li>
                                 <li><a class="dropdown-item" asp-page="/Schedules/Index">Events Schedule (Sessions)</a></li>
-                                @if (User.Identity.IsAuthenticated && User.IsInRole("organizer"))
+                                @if (User.IsOrganizer())
                                 {
                                     <li><a class="dropdown-item" asp-page="/Venues/Index">Venue Management</a></li>
                                     <li><a class="dropdown-item" asp-page="/Tickets/Index">Ticketing</a></li>

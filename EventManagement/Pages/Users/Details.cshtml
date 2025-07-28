@@ -39,45 +39,51 @@
         </dd>
     </dl> *@
     <div class="mb-3">
-        @if (User.Identity.IsAuthenticated)
-        {
-            string userRole = User.FindFirst(ClaimTypes.Role)?.Value;
-            string color = userRole switch
+        @{
+            string color = Model.User.Role switch
             {
                 "admin" => "danger",
                 "organizer" => "primary",
                 "attendee" => "success",
                 _ => "secondary",
             };
-
-            <h3>
-                @Model.User.Name
-            </h3>
-            <div>
-                User Role:
-                <span class="badge bg-@color">@userRole</span>
-            </div>
-            <p>Created At: @Model.User.CreatedAt</p>
+        }
+        <h3>
+            @Model.User.Name
+            <span class="badge bg-@color">@Model.User.Role</span>
+        </h3>
+        @if (User.IsAdmin())
+        {
+            <p>Created At: @Model.User.CreatedAt.Value.ToLongDateString()</p>
         }
 
-        <a href="#">@Model.User.Email</a>
         <div>
-            <a asp-page="./Edit" asp-route-id="@Model.User.UserId">Edit Details</a>
-            @if (base.User.IsAdmin())
+            Email address: <a href="#">@Model.User.Email</a>
+        </div>
+
+        <div>
+            @if (User.IsAdmin() || User.GetCurrentUserId() == Model.User.UserId)
             {
-                Write("| ");
-                <a asp-page="./Index">Back to List</a>
+                <a asp-page="./Edit" asp-route-id="@Model.User.UserId">Edit Details</a>
+            }
+            @if (User.IsAdmin())
+            {
+            Write("| ");
+            <a asp-page="./Index">Back to List</a>
             }
         </div>
     </div>
-    <hr />
-    <div>
-        <h4>Registered Events</h4>
-        <ul>
-            @foreach (var e in Model.Events)
-            {
-                <li><a asp-page="/Events/Details" asp-route-id="@e.EventId">@e.Title</a></li>
-            }
-        </ul>
-    </div>
+    @if (User.IsAdmin() || User.GetCurrentUserId() == Model.User.UserId)
+    {
+        <hr />
+        <div>
+            <h4>Registered Events</h4>
+            <ul>
+                @foreach (var e in Model.Events)
+                {
+                    <li><a asp-page="/Events/Details" asp-route-id="@e.EventId">@e.Title</a></li>
+                }
+            </ul>
+        </div>
+    }
 </div>

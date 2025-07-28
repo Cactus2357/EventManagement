@@ -25,7 +25,9 @@ namespace EventManagement.Pages.Tickets
         public async Task OnGetAsync()
         {
             Ticket = await _context.Tickets
-                .Include(t => t.Event).ToListAsync();
+                .Include(t => t.Event)
+                .OrderBy(t => t.EventId)
+                .ToListAsync();
         }
     }
 }

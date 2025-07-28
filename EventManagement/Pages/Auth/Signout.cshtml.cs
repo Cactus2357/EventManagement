@@ -10,7 +10,7 @@ namespace EventManagement.Pages.Auth
         public async Task OnGetAsync()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            Response.Redirect("/Auth/Signin");
+            Response.Redirect("/");
         }
     }
 }
