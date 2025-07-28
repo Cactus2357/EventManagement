@@ -17,6 +17,7 @@ public partial class User
     public string Email { get; set; } = null!;
 
     [Required(ErrorMessage = "Password is required.")]
+    [Display(Name = "Password")]
     public string PasswordHash { get; set; } = null!;
 
     [Required]
@@ -24,6 +25,7 @@ public partial class User
     public string Role { get; set; } = null!;
 
     [DataType(DataType.DateTime)]
+    [Display(Name = "Created At")]
     public DateTime? CreatedAt { get; set; }
 
     public virtual ICollection<Event> Events { get; set; } = new List<Event>();

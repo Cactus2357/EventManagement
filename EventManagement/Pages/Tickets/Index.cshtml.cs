@@ -1,4 +1,5 @@
-﻿using EventManagement.Models;
+﻿using EventManagement.Helpers;
+using EventManagement.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -24,7 +25,14 @@ namespace EventManagement.Pages.Tickets
 
         public async Task OnGetAsync()
         {
-            Ticket = await _context.Tickets
+            var q = _context.Tickets.AsQueryable();
+
+            if (User.IsOrganizer())
+            {
+                q = q.Where(t => t.Event.OrganizerId == User.GetCurrentUserId());
+            }
+
+            Ticket = await q
                 .Include(t => t.Event)
                 .OrderBy(t => t.EventId)
                 .ToListAsync();

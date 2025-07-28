@@ -1,4 +1,4 @@
-﻿@page
+﻿@page "{id?}"
 @model EventManagement.Pages.Events.DetailsModel
 @using EventManagement.Helpers
 @using EventManagement.Models
@@ -7,54 +7,6 @@
     ViewData["Title"] = Model.Event.Title;
 }
 
-@* <div>
-    <h4>Event</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Event.Title)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Event.Title)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Event.Description)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Event.Description)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Event.StartTime)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Event.StartTime)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Event.EndTime)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Event.EndTime)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Event.Status)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Event.Status)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Event.Organizer)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Event.Organizer.UserId)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Event.Venue)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Event.Venue.VenueId)
-        </dd>
-    </dl>
-</div> *@
 <div>
     @* <a asp-page="./Index">Back</a> *@
     <a href="javascript:void(0);" onclick="history.back()">Back</a>
@@ -77,7 +29,7 @@
     </h2>
     <p>
         <figcaption class="blockquote-footer mb-0 text-muted">
-            Organized by <a asp-page="/Users/Details" asp-route-id="@Model.Event.OrganizerId">@Model.Event.Organizer.Name</a>
+            Organized by <a class="text-decoration-none" asp-page="/Users/Details" asp-route-id="@Model.Event.OrganizerId">@Model.Event.Organizer.Name</a>
         </figcaption>
     </p>
 
@@ -90,6 +42,9 @@
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="tickets-tab" data-bs-toggle="tab" data-bs-target="#tickets" type="button" role="tab">Available Tickets</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="participants-tab" data-bs-toggle="tab" data-bs-target="#participants" type="button" role="tab">Participants</button>
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="feedbacks-tab" data-bs-toggle="tab" data-bs-target="#feedbacks" type="button" role="tab">Feedbacks</button>
@@ -155,7 +110,7 @@
                                 <td>@Html.DisplayFor(modelItem => item.Speaker)</td>
                                 <td>@Html.DisplayFor(modelItem => item.StartTime)</td>
                                 <td>@Html.DisplayFor(modelItem => item.EndTime)</td>
-                                @if (User.IsAdminOrOrganizer())
+                                @if (User.IsAdmin() || User.IsEventOwner(Model.Event.OrganizerId))
                                 {
                                     <td>
                                         <a asp-page="./Edit" asp-route-id="@item.ItemId">Edit</a> |
@@ -168,44 +123,58 @@
                     </tbody>
                 </table>
             }
+            @if (User.IsAdmin() || User.IsEventOwner(Model.Event.OrganizerId))
+            {
+                <a class="btn btn-primary" asp-page="/Schedules/Create" asp-route-eventId="@Model.Event.EventId">Add schedules</a>
+            }
         </div>
 
         <div class="tab-pane pt-4 fade" id="tickets" role="tabpanel" aria-labelledby="tickets-tab">
             @* <p>Available tickets content here...</p> *@
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>@Html.DisplayNameFor(model => model.Tickets[0].Type)</th>
-                        <th>@Html.DisplayNameFor(model => model.Tickets[0].Price)</th>
-                        <th>Available</th>
-                        @if (User.IsAdminOrOrganizer())
-                        {
-                            <th></th>
-                        }
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model.Tickets)
-                    {
+            @if (Model.Tickets.Sum(t => t.Quantity) > 0)
+            {
+                <table class="table">
+                    <thead>
                         <tr>
-                            <td>@Html.DisplayFor(modelItem => item.Type)</td>
-                            <td>@Html.DisplayFor(modelItem => item.Price)</td>
-                            <td>@(item.Quantity - item.Registrations.Sum(r => r.Quantity))</td>
+                            <th>@Html.DisplayNameFor(model => model.Tickets[0].Type)</th>
+                            <th>@Html.DisplayNameFor(model => model.Tickets[0].Price)</th>
+                            <th>Available</th>
                             @if (User.IsAdminOrOrganizer())
                             {
-                                <td>
-                                    <a asp-page="./Edit" asp-route-id="@item.TicketId">Edit</a> |
-                                    <a asp-page="./Details" asp-route-id="@item.TicketId">Details</a> |
-                                    <a asp-page="./Delete" asp-route-id="@item.TicketId">Delete</a>
-                                </td>
+                                <th></th>
                             }
                         </tr>
-                    }
-                </tbody>
-            </table>
-            <div class="mb-5">
-                <a class="btn btn-primary" asp-page="/Registrations/Create" asp-route-eventId="@Model.Event.EventId">Register Now</a>
-            </div>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Tickets)
+                        {
+                            <tr>
+                                <td>@Html.DisplayFor(modelItem => item.Type)</td>
+                                <td>@Html.DisplayFor(modelItem => item.Price)</td>
+                                <td>@(item.Quantity - item.Registrations.Sum(r => r.Quantity))</td>
+                                @if (User.IsAdmin() || User.IsEventOwner(Model.Event.OrganizerId))
+                                {
+                                    <td>
+                                        <a asp-page="/Tickets/Edit" asp-route-id="@item.TicketId">Edit</a> |
+                                        <a asp-page="/Tickets/Details" asp-route-id="@item.TicketId">Details</a> |
+                                        <a asp-page="/Tickets/Delete" asp-route-id="@item.TicketId">Delete</a>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                @if (!User.IsEventOwner(Model.Event.OrganizerId) && Model.Event.Status != "completed")
+                {
+                    <div class="mb-5">
+                        <a class="btn btn-primary" asp-page="/Registrations/Create" asp-route-eventId="@Model.Event.EventId">Register Now</a>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center text-muted">No tickets for this event yet.</div>
+            }
             @if (Model.Registrations.Count > 0)
             {
                 <hr />
@@ -229,6 +198,22 @@
                         }
                     </tbody>
                 </table>
+            }
+        </div>
+
+        <div class="tab-pane pt-4 fade" id="participants" role="tabpanel" aria-labelledby="participants-tab">
+            @if(Model.Participants.Count == 0)
+            {
+                <div class="text-center text-muted">No participant yet.</div>
+            }
+            else
+            {
+                <ul>
+                    @foreach(var o in Model.Participants)
+                    {
+                        <li>@o.Name</li>
+                    }
+                </ul>
             }
         </div>
 
@@ -280,7 +265,7 @@
                             {
                                 <span class="me-3">@(o.UserId == User.GetCurrentUserId() ? "You" : o.User.Name)</span>
                             }
-                            <span class="me-3">(@o.Rating / 5)</span> -- <span class="me-3">@o.SubmittedAt!.Value.ToShortDateString()</span>
+                            <span class="me-3">(@o.Rating / 5)</span><span class="me-3 blockquote-footer text-muted">@o.SubmittedAt!.Value.ToShortDateString()</span>
                         </div>
                         <div class="card-body py-2">
                             @o.Comment

@@ -1,8 +1,10 @@
-﻿using EventManagement.Models;
+﻿using EventManagement.Helpers;
+using EventManagement.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +24,8 @@ namespace EventManagement.Pages.Tickets
 
         public IActionResult OnGet()
         {
-        ViewData["EventId"] = new SelectList(_context.Events, "EventId", "EventId");
+            ViewData["EventId"] = new SelectList(_context.Events.Where(e => e.OrganizerId == User.GetCurrentUserId()), "EventId", "Title");
+
             return Page();
         }
 
@@ -35,6 +38,22 @@ namespace EventManagement.Pages.Tickets
             if (!ModelState.IsValid)
             {
                 return Page();
+            }
+
+            var data = await _context.Events
+                .Where(e => e.EventId == 10)
+                .Select(e => new
+                {
+                    VenueCapacity = e.Venue.Capacity,
+                    TotalTickets = e.Tickets.Sum(t => t.Quantity)
+                })
+                .FirstOrDefaultAsync();
+
+            int availableCapacity = data.VenueCapacity - data.TotalTickets;
+
+            if (Ticket.Quantity > availableCapacity)
+            {
+                ModelState.AddModelError("Ticket.Quantity", "Ticket quantity exceeds venue's current capacity");
             }
 
             _context.Tickets.Add(Ticket);

@@ -9,8 +9,8 @@
 <h1>Manage Events</h1>
 
 <p>
+    <a class="me-2" asp-page="./Index">Back To View</a>
     <a asp-page="Create">Create New</a>
-    <a asp-page="./Index">Back To View</a>
 </p>
 <table class="table">
     <thead>
@@ -30,9 +30,12 @@
             <th>
                 @Html.DisplayNameFor(model => model.Event[0].Status)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Event[0].Organizer)
-            </th>
+            @if (User.IsAdmin())
+            {
+                <th>
+                    @Html.DisplayNameFor(model => model.Event[0].Organizer)
+                </th>
+            }
             <th>
                 @Html.DisplayNameFor(model => model.Event[0].Venue)
             </th>
@@ -44,7 +47,7 @@
         {
             <tr>
                 <td>
-                    <a asp-page="Details" asp-route-id="@item.EventId">
+                    <a class="text-decoration-none" asp-page="Details" asp-route-id="@item.EventId">
                         @Html.DisplayFor(modelItem => item.Title)
                     </a>
                 </td>
@@ -58,22 +61,18 @@
                     @Html.DisplayFor(modelItem => item.EndTime)
                 </td>
                 <td>
-                    <span class="badge rounded-pill @(item.Status.Equals("completed") ? "bg-success" : "bg-primary") float-end">
+                    <span class="badge rounded-pill @(item.Status.Equals("completed") ? "bg-success" : "bg-primary")">
                         @Html.DisplayFor(modelItem => item.Status)
                     </span>
                 </td>
+                @if (User.IsAdmin())
+                {
+                    <td>
+                        <a class="text-decoration-none" asp-page="/Users/Details" asp-route-id="@item.OrganizerId">@item.Organizer.Name</a>
+                    </td>
+                }
                 <td>
-                    @if (item.OrganizerId == User.GetCurrentUserId())
-                    {
-                        Write("you");
-                    }
-                    else
-                    {
-                        <a asp-page="/Users/Details" asp-route-id="@item.OrganizerId">@item.Organizer.Name</a>
-                    }
-                </td>
-                <td>
-                    <a asp-page="/Venues/Details" asp-route-id="@item.VenueId">@item.Venue.Name</a>
+                    <a class="text-decoration-none" asp-page="/Venues/Details" asp-route-id="@item.VenueId">@item.Venue.Name</a>
                 </td>
                 <td>
                     <a asp-page="./Edit" asp-route-id="@item.EventId">Edit</a> |

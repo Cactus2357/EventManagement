@@ -28,14 +28,17 @@ namespace EventManagement.Pages.Events
 
         public async Task OnGetAsync()
         {
-            Count = await _context.Events.CountAsync();
-
-            UpcommingEvents = await _context.Events
+            var q = _context.Events
                 .Where(@e => e.Status.Equals("upcoming"))
+                .Include(@event => @event.Organizer).Include(@event => @event.Venue)
+                .AsQueryable();
+
+            Count = await q.CountAsync();
+
+            UpcommingEvents = await q
                 .OrderBy(e => e.StartTime)
                 .Skip((CurrentPage - 1) * PageSize)
                 .Take(PageSize)
-                .Include(@event => @event.Organizer).Include(@event => @event.Venue)
                 .ToListAsync();
         }
     }

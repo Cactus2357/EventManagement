@@ -1,5 +1,6 @@
-﻿@page
+﻿@page "{id?}"
 @using System.Security.Claims
+@using EventManagement.Enums
 @using EventManagement.Helpers
 @model EventManagement.Pages.Users.DetailsModel
 
@@ -10,37 +11,9 @@
 @* <h1>Details</h1> *@
 
 <div class="container pt-4 px-5">
-    @* <h4>User</h4> *@
-    @* <hr /> *@
-    @* <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.Name)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.Name)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.Email)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.Email)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.Role)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.Role)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.CreatedAt)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.CreatedAt)
-        </dd>
-    </dl> *@
     <div class="mb-3">
         @{
-            string color = Model.User.Role switch
+            string color = Model.CurrentUser.Role switch
             {
                 "admin" => "danger",
                 "organizer" => "primary",
@@ -49,22 +22,22 @@
             };
         }
         <h3>
-            @Model.User.Name
-            <span class="badge bg-@color">@Model.User.Role</span>
+            @Model.CurrentUser.Name
+            <span class="badge bg-@color">@Model.CurrentUser.Role</span>
         </h3>
         @if (User.IsAdmin())
         {
-            <p>Created At: @Model.User.CreatedAt.Value.ToLongDateString()</p>
+            <p>Created At: @Model.CurrentUser.CreatedAt!.Value.ToLongDateString()</p>
         }
 
         <div>
-            Email address: <a href="#">@Model.User.Email</a>
+            Email address: <a class="text-decoration-none" href="mailto:@Model.CurrentUser.Email">@Model.CurrentUser.Email</a>
         </div>
 
         <div>
-            @if (User.IsAdmin() || User.GetCurrentUserId() == Model.User.UserId)
+            @if (User.IsAdmin() || User.GetCurrentUserId() == Model.CurrentUser.UserId)
             {
-                <a asp-page="./Edit" asp-route-id="@Model.User.UserId">Edit User Details</a>
+                <a asp-page="./Edit" asp-route-id="@Model.CurrentUser.UserId">Edit User Details</a>
             }
             @if (User.IsAdmin())
             {
@@ -73,19 +46,35 @@
             }
         </div>
     </div>
-    @if (User.IsAdmin() || User.GetCurrentUserId() == Model.User.UserId)
+    @if (Model.CurrentUser.Role == UserRoles.Admin || Model.CurrentUser.Role == UserRoles.Organizer)
     {
         <hr />
         <div class="mb-3">
-            <h4>Registered Events</h4>
-            @if (Model.Events.Count == 0)
+            <div class="d-flex align-items-center gap-2">
+                <h4>Events Managed</h4>
+                <a asp-page="/Events/Manage">Manage your events</a>
+            </div>
+            <ul>
+                @foreach (var e in Model.ManagedEvents)
+                {
+                    <li><a class="text-decoration-none" asp-page="/Events/Details" asp-route-id="@e.EventId">@e.Title</a></li>
+                }
+            </ul>
+        </div>
+    }
+    @if (User.IsAdmin() || User.GetCurrentUserId() == Model.CurrentUser.UserId)
+    {
+        <hr />
+        <div class="mb-3">
+            <h4>Participated Events</h4>
+            @if (Model.RegisteredEvents.Count == 0)
             {
-                <div class="text-muted">No event registered.</div>
+                <div class="text-muted">No event participated.</div>
             }
             else
             {
                 <ul>
-                    @foreach (var e in Model.Events)
+                    @foreach (var e in Model.RegisteredEvents)
                     {
                         <li><a asp-page="/Events/Details" asp-route-id="@e.EventId">@e.Title</a></li>
                     }

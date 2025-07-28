@@ -1,4 +1,4 @@
-﻿@page
+﻿@page "{id?}"
 @model EventManagement.Pages.Events.EditModel
 
 @{
@@ -33,7 +33,7 @@
             <div class="form-group">
                 <label asp-for="Event.VenueId" class="control-label">Venue</label>
                 <span><a asp-page="/Venues/Index">Make Changes</a></span>
-                <select asp-for="Event.VenueId" class="form-control" asp-items="ViewBag.VenueId"></select>
+                <select asp-for="Event.VenueId" class="form-select" asp-items="ViewBag.VenueId"></select>
                 <span asp-validation-for="Event.VenueId" class="text-danger"></span>
             </div>
             <div class="form-group">

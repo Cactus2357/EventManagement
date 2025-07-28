@@ -6,7 +6,10 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddRazorPages();
+builder.Services.AddRazorPages(options =>
+{
+    options.Conventions.AddPageRoute("/Events/Index", "");
+});
 
 builder.Services.AddSignalR(o => o.EnableDetailedErrors = true);
 
@@ -41,11 +44,11 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapHub<EventHub>("/EventHub");
-app.MapGet("/", context =>
-{
-    context.Response.Redirect("/Events/Index");
-    return Task.CompletedTask;
-});
+//app.MapGet("/", context =>
+//{
+//    context.Response.Redirect("/Events/Index");
+//    return Task.CompletedTask;
+//});
 
 app.UseStatusCodePagesWithReExecute("/Shared/Error{0}");
 

@@ -1,4 +1,4 @@
-﻿@page
+﻿@page 
 @model EventManagement.Pages.Events.IndexModel
 
 @{
@@ -29,7 +29,7 @@
                     </h5>
                     <p class="card-text">@item.Description</p>
                     <p class="card-text">
-                        Location: <a asp-page="/Venues/Details" asp-route-id="@item.Venue.VenueId">@item.Venue.Name</a>
+                        Location: <a class="text-decoration-none" asp-page="/Venues/Details" asp-route-id="@item.Venue.VenueId">@item.Venue.Name</a>
                     </p>
                     <p class="card-text">
                         <small class="text-muted">
@@ -37,7 +37,7 @@
                         </small>
                     </p>
                     <figcaption class="blockquote-footer mb-0 text-muted">
-                        <a asp-page="/Users/Details" asp-route-id="@item.Organizer.UserId">
+                        <a class="text-decoration-none" asp-page="/Users/Details" asp-route-id="@item.Organizer.UserId">
                             @item.Organizer.Name
                         </a>
                     </figcaption>
@@ -46,7 +46,6 @@
         </div>
     }
 </div>
-
 @if (Model.TotalPages > 1)
 {
     <nav>

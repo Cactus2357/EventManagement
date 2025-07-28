@@ -1,4 +1,5 @@
-﻿using EventManagement.Models;
+﻿using EventManagement.Helpers;
+using EventManagement.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -31,13 +32,13 @@ namespace EventManagement.Pages.Tickets
                 return NotFound();
             }
 
-            var ticket =  await _context.Tickets.FirstOrDefaultAsync(m => m.TicketId == id);
+            var ticket =  await _context.Tickets.Include(t => t.Event).Where(t => t.Event.OrganizerId == User.GetCurrentUserId()).FirstOrDefaultAsync(m => m.TicketId == id);
             if (ticket == null)
             {
                 return NotFound();
             }
             Ticket = ticket;
-           ViewData["EventId"] = new SelectList(_context.Events, "EventId", "EventId");
+           //ViewData["EventId"] = new SelectList(_context.Events, "EventId", "Title");
             return Page();
         }
 
@@ -45,6 +46,8 @@ namespace EventManagement.Pages.Tickets
         // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
+            ModelState.Remove("Ticket.Event");
+            ModelState.Remove("Ticket.EventId");
             if (!ModelState.IsValid)
             {
                 return Page();

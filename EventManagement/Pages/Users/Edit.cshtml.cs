@@ -24,7 +24,8 @@ namespace EventManagement.Pages.Users
         {
             if (id == null)
             {
-                return NotFound();
+                //return NotFound();
+                id = User.GetCurrentUserId();
             }
 
             var user =  await _context.Users.FirstOrDefaultAsync(m => m.UserId == id);

@@ -1,4 +1,5 @@
-﻿using EventManagement.Models;
+﻿using EventManagement.Helpers;
+using EventManagement.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -20,9 +21,15 @@ namespace EventManagement.Pages.Schedules
             _context = context;
         }
 
-        public IActionResult OnGet()
+        public IActionResult OnGet(int? eventId)
         {
-        ViewData["EventId"] = new SelectList(_context.Events, "EventId", "EventId");
+            var items = _context.Events.AsQueryable();
+            if (User.IsOrganizer())
+            {
+                items = items.Where(o => o.OrganizerId == User.GetCurrentUserId());
+            }
+
+            ViewData["EventId"] = new SelectList(items, "EventId", "Title", eventId);
             return Page();
         }
 

@@ -17,9 +17,11 @@ public partial class Event
     public string? Description { get; set; }
 
     [Required(ErrorMessage = "Organizer is required.")]
+    [Display(Name = "Organizer")]
     public int OrganizerId { get; set; }
 
     [Required(ErrorMessage = "Venue is required.")]
+    [Display(Name = "Venue")]
     public int VenueId { get; set; }
 
     [Required(ErrorMessage = "Start Time is required.")]

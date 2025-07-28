@@ -12,6 +12,7 @@ namespace EventManagement.Pages.Auth
     public class LoginModel : PageModel
     {
         private readonly EventManagementContext _context;
+        private const string HomePage = "/Events/Index";
 
         public LoginModel(EventManagementContext context)
         {
@@ -29,15 +30,19 @@ namespace EventManagement.Pages.Auth
         [DataType(DataType.Password)]
         public string Password { get; set; } = null!;
 
-        public string? ErrorMessage { get; set; }
-
+        [BindProperty]
         public string? ReturnUrl { get; set; }
+
+        public string? ErrorMessage { get; set; }
 
         public IActionResult OnGet(string? ReturnUrl = null)
         {
+            this.ReturnUrl = ReturnUrl;
+
             if (User.Identity != null && User.Identity.IsAuthenticated)
             {
-                return RedirectToPage("/Events/Index");
+                if (!string.IsNullOrEmpty(ReturnUrl) && Url.IsLocalUrl(ReturnUrl)) return Redirect(ReturnUrl);
+                return RedirectToPage(HomePage);
             }
 
             return Page();
@@ -70,7 +75,7 @@ namespace EventManagement.Pages.Auth
             if (!string.IsNullOrEmpty(ReturnUrl) && Url.IsLocalUrl(ReturnUrl))
                 return Redirect(ReturnUrl);
 
-            return RedirectToPage("/Events/Index");
+            return RedirectToPage(HomePage);
         }
     }
 }

@@ -27,7 +27,7 @@ namespace EventManagement.Pages.Events
         {
             var q = _context.Events.AsQueryable();
 
-            if (!User.IsAdmin())
+            if (User.IsOrganizer())
             {
                 var organizerId = User.GetCurrentUserId();
                 q = q.Where(e => e.OrganizerId == organizerId);

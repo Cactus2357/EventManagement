@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using EventManagement.Models;
+using EventManagement.Helpers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EventManagement.Pages.Users
 {
@@ -18,9 +20,10 @@ namespace EventManagement.Pages.Users
             _context = context;
         }
 
-        public User User { get; set; } = default!;
-        public IList<Event> Events { get; set; } = default!;
+        public User CurrentUser { get; set; } = default!;
         public IList<Registration> Registrations { get; set; } = default!;
+        public IList<Event> RegisteredEvents { get; set; } = default!;
+        public IList<Event> ManagedEvents { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -35,15 +38,19 @@ namespace EventManagement.Pages.Users
                 return NotFound();
             }
 
-            User = user;
-            Events = await _context.Events
+            CurrentUser = user;
+            Registrations = await _context.Registrations
+                .Where(r => r.UserId == id)
+                .Include(r => r.Ticket).ThenInclude(t => t.Event)
+                .ToListAsync();
+
+            RegisteredEvents = await _context.Events
                 .Include(e => e.Tickets).ThenInclude(t => t.Registrations)
                 .Where(e => e.Tickets.Any(t => t.Registrations.Any(r => r.UserId == id)))
                 .ToListAsync();
 
-            Registrations = await _context.Registrations
-                .Where(r => r.UserId == id)
-                .Include(r => r.Ticket).ThenInclude(t => t.Event)
+            ManagedEvents = await _context.Events
+                .Where(e => e.OrganizerId == id)
                 .ToListAsync();
 
             return Page();

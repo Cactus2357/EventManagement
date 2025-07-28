@@ -9,7 +9,8 @@ public partial class Ticket
 {
     public int TicketId { get; set; }
 
-    [Required(ErrorMessage = "Event ID is required.")]
+    [Required(ErrorMessage = "EventId is required.")]
+    [Display(Name = "Event")]
     public int EventId { get; set; }
 
     [Required(ErrorMessage = "Ticket type is required.")]
@@ -25,9 +26,11 @@ public partial class Ticket
     public int Quantity { get; set; }
 
     [DataType(DataType.DateTime)]
+    [Display(Name = "Start Date")]
     public DateTime? StartDate { get; set; }
 
     [DataType(DataType.DateTime)]
+    [Display(Name = "Expiry Date")]
     [DateCompare("StartDate", ErrorMessage = "Expiry date must be after start date.")]
     public DateTime? ExpiryDate { get; set; }
 

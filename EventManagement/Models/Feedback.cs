@@ -23,6 +23,7 @@ public partial class Feedback
     public string? Comment { get; set; }
 
     [DataType(DataType.DateTime)]
+    [Display(Name = "Created At")]
     public DateTime? SubmittedAt { get; set; }
 
     public virtual Event Event { get; set; } = null!;

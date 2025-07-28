@@ -38,6 +38,11 @@ namespace EventManagement.Pages.Registrations
                 return NotFound();
             }
 
+            if (User.GetCurrentUserId() == Event.OrganizerId)
+            {
+                return Forbid();
+            }
+
             Ticket = await _context.Tickets
                 .Where(t => t.EventId == Event.EventId && t.Quantity > 0)
                 .Include(t => t.Registrations)
