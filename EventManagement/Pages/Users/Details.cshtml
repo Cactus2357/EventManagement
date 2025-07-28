@@ -64,26 +64,33 @@
         <div>
             @if (User.IsAdmin() || User.GetCurrentUserId() == Model.User.UserId)
             {
-                <a asp-page="./Edit" asp-route-id="@Model.User.UserId">Edit Details</a>
+                <a asp-page="./Edit" asp-route-id="@Model.User.UserId">Edit User Details</a>
             }
             @if (User.IsAdmin())
             {
-            Write("| ");
-            <a asp-page="./Index">Back to List</a>
+                Write("| ");
+                <a asp-page="./Index">Back to List</a>
             }
         </div>
     </div>
     @if (User.IsAdmin() || User.GetCurrentUserId() == Model.User.UserId)
     {
         <hr />
-        <div>
+        <div class="mb-3">
             <h4>Registered Events</h4>
-            <ul>
-                @foreach (var e in Model.Events)
-                {
-                    <li><a asp-page="/Events/Details" asp-route-id="@e.EventId">@e.Title</a></li>
-                }
-            </ul>
+            @if (Model.Events.Count == 0)
+            {
+                <div class="text-muted">No event registered.</div>
+            }
+            else
+            {
+                <ul>
+                    @foreach (var e in Model.Events)
+                    {
+                        <li><a asp-page="/Events/Details" asp-route-id="@e.EventId">@e.Title</a></li>
+                    }
+                </ul>
+            }
         </div>
     }
 </div>

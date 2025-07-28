@@ -36,12 +36,9 @@ namespace EventManagement.Pages.Users
             }
 
             User = user;
-            Events = await _context.Registrations
-                .Where(r => r.UserId == id)
-                .Include(r => r.Ticket)
-                .ThenInclude(t => t.Event)
-                .Select(r => r.Ticket.Event)
-                .Distinct()
+            Events = await _context.Events
+                .Include(e => e.Tickets).ThenInclude(t => t.Registrations)
+                .Where(e => e.Tickets.Any(t => t.Registrations.Any(r => r.UserId == id)))
                 .ToListAsync();
 
             Registrations = await _context.Registrations

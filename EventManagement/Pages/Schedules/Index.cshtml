@@ -17,6 +17,9 @@
     <thead>
         <tr>
             <th>
+                @Html.DisplayNameFor(model => model.ScheduleItem[0].Event)
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.ScheduleItem[0].Title)
             </th>
             <th>
@@ -27,9 +30,6 @@
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.ScheduleItem[0].EndTime)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ScheduleItem[0].Event)
             </th>
             @if (User.IsInRole("organizer") || User.IsInRole("admin"))
             {
@@ -42,6 +42,9 @@
         {
             <tr>
                 <td>
+                    <a asp-page="/Events/Details" asp-route-id="@item.Event.EventId">@Html.DisplayFor(modelItem => item.Event.Title)</a>
+                </td>
+                <td>
                     @Html.DisplayFor(modelItem => item.Title)
                 </td>
                 <td>
@@ -52,9 +55,6 @@
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.EndTime)
-                </td>
-                <td>
-                    <a asp-page="/Events/Details" asp-route-id="@item.Event.EventId">@Html.DisplayFor(modelItem => item.Event.Title)</a>
                 </td>
 
                 @if (User.IsInRole("organizer") || User.IsInRole("admin"))

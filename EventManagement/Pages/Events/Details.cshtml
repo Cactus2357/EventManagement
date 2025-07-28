@@ -56,11 +56,8 @@
     </dl>
 </div> *@
 <div>
-    @if (User.IsAdminOrOrganizer())
-    {
-        <a asp-page="./Edit" asp-route-id="@Model.Event.EventId">Edit</a>
-    }
-    <a asp-page="./Index">Back</a>
+    @* <a asp-page="./Index">Back</a> *@
+    <a href="javascript:void(0);" onclick="history.back()">Back</a>
 </div>
 
 <div class="container">
@@ -102,7 +99,13 @@
     <div class="tab-content pt-3" id="eventTabContent">
         <div class="tab-pane pt-4 fade show active" id="details" role="tabpanel" aria-labelledby="details-tab">
             <div class="mb-5">
-                <h5>Event Description</h5>
+                <h5>
+                    Event Description
+                    @if (User.IsAdmin() || User.IsEventOwner(Model.Event.OrganizerId))
+                    {
+                        <a asp-page="./Edit" asp-route-id="@Model.Event.EventId">Edit</a>
+                    }
+                </h5>
                 <p>@Model.Event.Description</p>
             </div>
             <div class="row">
@@ -230,7 +233,7 @@
         </div>
 
         <div class="tab-pane pt-4 fade" id="feedbacks" role="tabpanel" aria-labelledby="feedbacks-tab">
-            @if (User.Identity!.IsAuthenticated && Model.Feedbacks.FirstOrDefault(o => o.UserId == User.GetCurrentUserId()) == null)
+            @if (User.Identity!.IsAuthenticated && Model.Registrations.Count > 0 && Model.Feedbacks.FirstOrDefault(o => o.UserId == User.GetCurrentUserId()) == null)
             {
                 <div class="container row mb-3">
                     @* <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#feedbackModal">
@@ -265,12 +268,18 @@
                 <hr />
             }
             <div class="container">
-                <h5 class="ms-5 mb-3">Feedbacks</h5>
                 @foreach (var o in Model.Feedbacks)
                 {
                     <div class="card w-50 mx-auto mb-2">
                         <div class="card-header">
-                            <span class="me-3">@(o.UserId == User.GetCurrentUserId() ? "You" : o.User.Name)</span>
+                            @if (User.IsAdmin() || User.IsEventOwner(Model.Event.OrganizerId))
+                            {
+                                <a asp-page="/Users/Details" asp-route-id="@o.UserId">@o.User.Name</a>
+                            }
+                            else
+                            {
+                                <span class="me-3">@(o.UserId == User.GetCurrentUserId() ? "You" : o.User.Name)</span>
+                            }
                             <span class="me-3">(@o.Rating / 5)</span> -- <span class="me-3">@o.SubmittedAt!.Value.ToShortDateString()</span>
                         </div>
                         <div class="card-body py-2">
