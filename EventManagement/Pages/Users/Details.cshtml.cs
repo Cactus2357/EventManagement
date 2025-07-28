@@ -41,6 +41,7 @@ namespace EventManagement.Pages.Users
                 .Include(r => r.Ticket)
                 .ThenInclude(t => t.Event)
                 .Select(r => r.Ticket.Event)
+                .Distinct()
                 .ToListAsync();
 
             Registrations = await _context.Registrations

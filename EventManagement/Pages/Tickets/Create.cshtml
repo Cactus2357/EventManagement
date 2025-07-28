@@ -33,6 +33,16 @@
                 <span asp-validation-for="Ticket.Quantity" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label asp-for="Ticket.StartDate" class="control-label"></label>
+                <input asp-for="Ticket.StartDate" class="form-control" />
+                <span asp-validation-for="Ticket.StartDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Ticket.ExpiryDate" class="control-label"></label>
+                <input asp-for="Ticket.ExpiryDate" class="form-control" />
+                <span asp-validation-for="Ticket.ExpiryDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
         </form>

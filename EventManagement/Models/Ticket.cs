@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EventManagement.Validations;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -23,8 +24,11 @@ public partial class Ticket
     [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1.")]
     public int Quantity { get; set; }
 
+    [DataType(DataType.DateTime)]
     public DateTime? StartDate { get; set; }
 
+    [DataType(DataType.DateTime)]
+    [DateCompare("StartDate", ErrorMessage = "Expiry date must be after start date.")]
     public DateTime? ExpiryDate { get; set; }
 
     public virtual Event Event { get; set; } = null!;

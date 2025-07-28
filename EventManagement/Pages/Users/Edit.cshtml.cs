@@ -3,10 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using EventManagement.Helpers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EventManagement.Pages.Users
 {
-    //[Authorize(Roles = "admin")]
+    [Authorize]
     public class EditModel : PageModel
     {
         private readonly EventManagement.Models.EventManagementContext _context;
